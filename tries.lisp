@@ -8,33 +8,29 @@
 		   (lambda (n s d)
 		     (format s "#<~S, wc: ~S>"
 			     (trie-word n)
-			     (trie-wc n)))))
-  wordp chars (wc 0) children)
+			     (trie-count n)))))
+  wordp chars (count 0) children)
 
 (defun add-word (str tr)
-  (if (apply #'subtrie tr (coerce str 'list)) tr
-    (let ((c (char str 0)))
-      (incf (trie-wc tr))
-      (add-char c tr)
-      (if (= 1 (length str)) (set-child-word c tr)
-	(add-word (subseq str 1)
-		  (cdr (assoc c (trie-children tr)))))
-      tr)))
+  (let ((chars (coerce str 'list)))
+    (unless (not (null (apply #'subtrie tr chars)))
+      (add-chars chars tr))
+    tr))
 
-; helpers
-(defun add-char (c tr)
-  (when (null (assoc c (trie-children tr)))
-    (push (cons c (make-trie
-		    :chars (append-char (trie-chars tr) c)))
-	  (trie-children tr))))
+(defun add-chars (chars tr)
+  (incf (trie-count tr))
+  (if (null chars) (setf (trie-wordp tr) t)
+    (add-chars (cdr chars) (provide-subtrie (car chars) tr))))
 
-(defun set-child-word (c tr)
-  (setf (trie-wordp (cdr (assoc c (trie-children tr)))) t)
-  (incf (trie-wc (cdr (assoc c (trie-children tr))))))
+(defun provide-subtrie (c tr)
+  (or (subtrie tr c)
+      (let ((new-child (cons c (make-trie
+			     :chars (append-char (trie-chars tr) c)))))
+	(push new-child (trie-children tr))
+	(cdr new-child))))
 
 (defun append-char (s c)
   (concatenate 'string s (string c)))
-; /helpers
 
 (defun subtrie (tr &rest chars)
   (if (or (null chars) (null tr)) tr
@@ -44,9 +40,6 @@
 
 (defun trie-word (tr)
   (if (trie-wordp tr) (trie-chars tr) nil))
-
-(defun trie-count (tr)
-  (trie-wc tr))
 
 (defun mapc-trie (fn tr)
   (dolist (c (trie-children tr))
