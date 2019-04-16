@@ -13,7 +13,7 @@
 
 (defun add-word (str tr)
   (let ((chars (coerce str 'list)))
-    (unless (not (null (apply #'subtrie tr chars)))
+    (when (null (apply #'subtrie tr chars))
       (add-chars chars tr))
     tr))
 
