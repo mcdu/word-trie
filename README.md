@@ -2,7 +2,7 @@
 
 API:
 - (make-trie): creates a new empty trie.
-- (add-word *string* *trie*): adds a word, in lower case, to a trie node and returns the trie. The trie should be destructively modified.
+- (add-word *string* *trie*): adds a word (destructively), in lower case, to a trie node and returns the trie.
 - (subtrie *trie* *char1* *char2* ...): given a trie and zero or more characters, returns the root of the subtrie for that sequence of characters, if any, or nil.
 - (trie-word *trie*): returns the word at a trie node if any, or nil.
 - (trie-count *trie*): returns the number of words stored at or under this trie node.
